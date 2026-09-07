@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Bravo Tours Rejsegenerator</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet"/>
+<meta name="ext-resource-dependency" content="hero-small.jpg" data-resource-id="heroImg" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: #0d1a2e;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', sans-serif;
+  padding: 24px;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bounce {
+  0%,80%,100% { transform: translateY(0); }
+  40%          { transform: translateY(-9px); }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%      { opacity: .4; }
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+@keyframes planefly {
+  0%   { transform: translateX(-30px) rotate(-5deg); opacity:0; }
+  20%  { opacity: 1; }
+  80%  { opacity: 1; }
+  100% { transform: translateX(30px) rotate(5deg); opacity:0; }
+}
+</style>
+
+<template id="__bundler_thumbnail" data-bg-color="#0d1a2e">
+  <svg viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+    <!-- Dark navy background -->
+    <rect width="400" height="300" fill="#0d1a2e"/>
+    <!-- Browser chrome suggestion -->
+    <rect x="40" y="30" width="320" height="240" rx="10" fill="#35363a"/>
+    <rect x="40" y="30" width="320" height="44" rx="10" fill="#202124"/>
+    <circle cx="65" cy="52" r="7" fill="#ff5f57"/>
+    <circle cx="85" cy="52" r="7" fill="#febc2e"/>
+    <circle cx="105" cy="52" r="7" fill="#28c840"/>
+    <!-- App header -->
+    <rect x="40" y="74" width="320" height="50" fill="#1a2b4a"/>
+    <text x="200" y="106" text-anchor="middle" font-family="serif" font-size="18" fill="#d4a843" font-weight="700">BRAVO TOURS</text>
+    <!-- Hero image block -->
+    <rect x="40" y="124" width="320" height="80" fill="#2d5fa6"/>
+    <text x="200" y="170" text-anchor="middle" font-size="24" fill="white">🌴</text>
+    <!-- Quiz chips -->
+    <rect x="60" y="216" width="90" height="24" rx="12" fill="#2d5fa6"/>
+    <rect x="160" y="216" width="90" height="24" rx="12" fill="none" stroke="#dde6f0" stroke-width="1.5"/>
+    <rect x="260" y="216" width="90" height="24" rx="12" fill="none" stroke="#dde6f0" stroke-width="1.5"/>
+    <!-- CTA button -->
+    <rect x="60" y="250" width="280" height="28" rx="8" fill="#2d5fa6"/>
+    <text x="200" y="269" text-anchor="middle" font-size="12" fill="white" font-weight="600">Start rejseguiden ✨</text>
+  </svg>
+</template>
+</head>
+<body>
+<script>
+const HERO_FILE = window.__resources && window.__resources.heroImg ? window.__resources.heroImg : "hero-small.jpg";
+</script>
+<script type="text/babel">
+
+const { useState, useEffect, useRef } = React;
+
+/* ─── Browser Chrome ─── */
+const CHROME_C = { barBg:'#202124', tabBg:'#35363a', text:'#e8eaed', dim:'#9aa0a6', urlBg:'#282a2d' };
+function ChromeWindow({ tabs=[{title:'New Tab'}], url='example.com', width=520, height=720, children }) {
+  return (
+    <div style={{ width, height, borderRadius:10, overflow:'hidden',
+      boxShadow:'0 24px 80px rgba(0,0,0,.35), 0 0 0 1px rgba(0,0,0,.1)',
+      display:'flex', flexDirection:'column', background:CHROME_C.tabBg }}>
+      {/* Tab bar */}
+      <div style={{ display:'flex', alignItems:'center', height:44, background:CHROME_C.barBg, paddingRight:8 }}>
+        <div style={{ display:'flex', gap:8, padding:'0 14px' }}>
+          {['#ff5f57','#febc2e','#28c840'].map((c,i) => <div key={i} style={{ width:12, height:12, borderRadius:'50%', background:c }}/>)}
+        </div>
+        <div style={{ display:'flex', alignItems:'flex-end', height:'100%', paddingLeft:4, flex:1 }}>
+          <div style={{ position:'relative', height:34, alignSelf:'flex-end', padding:'0 12px',
+            display:'flex', alignItems:'center', gap:8, background:CHROME_C.tabBg,
+            borderRadius:'8px 8px 0 0', minWidth:180,
+            fontFamily:'system-ui,sans-serif', fontSize:12, color:CHROME_C.text }}>
+            <div style={{ width:14, height:14, borderRadius:'50%', background:'#5f6368', flexShrink:0 }}/>
+            <span style={{ flex:1, whiteSpace:'nowrap', overflow:'hidden', textOverflow:'ellipsis' }}>{tabs[0]?.title}</span>
+          </div>
+        </div>
+      </div>
+      {/* Toolbar */}
+      <div style={{ height:40, background:CHROME_C.tabBg, display:'flex', alignItems:'center', gap:4, padding:'0 8px' }}>
+        <div style={{ width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width:16, height:16, borderRadius:'50%', background:CHROME_C.dim, opacity:.4 }}/>
+        </div>
+        <div style={{ flex:1, height:30, borderRadius:15, background:CHROME_C.urlBg,
+          display:'flex', alignItems:'center', gap:8, padding:'0 14px', margin:'0 6px' }}>
+          <div style={{ width:12, height:12, borderRadius:'50%', background:CHROME_C.dim, opacity:.4 }}/>
+          <span style={{ flex:1, color:CHROME_C.text, fontSize:13, fontFamily:'system-ui,sans-serif' }}>{url}</span>
+        </div>
+        <div style={{ width:28, height:28, display:'flex', alignItems:'center', justifyContent:'center' }}>
+          <div style={{ width:16, height:16, borderRadius:'50%', background:CHROME_C.dim, opacity:.4 }}/>
+        </div>
+      </div>
+      {/* Content */}
+      <div style={{ flex:1, background:'#fff', overflow:'auto' }}>{children}</div>
+    </div>
+  );
+}
+
+/* ─── Destination images (Unsplash) ─── */
+/* ─── Destination photos + gradient fallbacks ─── */
+const DEST_DATA = {
+  'Mallorca':      { id: '1558618666-fcd25c85cd64', g: ['#1a7fc4','#4eb8e0'] },
+  'Costa del Sol': { id: '1499678587452-8a08043c6e44', g: ['#e07b39','#f5a623'] },
+  'Costa Blanca':  { id: '1534430480872-3498386e7856', g: ['#2d86c5','#5bc4e8'] },
+  'Fuerteventura': { id: '1510100523985-b65b45cda4a5', g: ['#d4a843','#e8c97a'] },
+  'Gran Canaria':  { id: '1521651201144-a39f289200b9', g: ['#1a9c5e','#4ec48a'] },
+  'Tenerife':      { id: '1540202403-b7abd6747a18', g: ['#1a2b4a','#2d5fa6'] },
+  'La Palma':      { id: '1602343168117-bb8a12d7c180', g: ['#1a7a3c','#2ecc71'] },
+  'Kreta':         { id: '1533105079780-92b9be482077', g: ['#1a6fa8','#5bc4e8'] },
+  'Rhodos':        { id: '1516483638261-f4dbaf036963', g: ['#2d86c5','#e8d5a3'] },
+  'Zakynthos':     { id: '1515861461225-1488dfdaf0a8', g: ['#0d5c8a','#3ddbe8'] },
+  'Peloponnes':    { id: '1555993539-1732b0258235', g: ['#8a5c2a','#c49a6c'] },
+  'Alanya':        { id: '1524231757912-21f4fe3a7200', g: ['#1a6fa8','#2ec4c4'] },
+  'Side':          { id: '1549921296-3b0f9a35af35', g: ['#c49a6c','#1a6fa8'] },
+  'Algarve':       { id: '1555881400-74d7acaacd8b', g: ['#e05c39','#2d86c5'] },
+  'Azorerne':      { id: '1596394516093-501ba68a0ba6', g: ['#1a7a3c','#4eb8e0'] },
+  'Phuket':        { id: '1552465011-b4e21bf6e79a', g: ['#0a5c4a','#f9c74f'] },
+  'Khao Lak':      { id: '1506905925346-21bda4d32df4', g: ['#0a6b3c','#4eb8d4'] },
+  'Koh Lanta':     { id: '1507525428034-b723cf961d3e', g: ['#0a6b5c','#f9e07a'] },
+  'Krabi':         { id: '1520250497591-112f2f40a3f4', g: ['#0d5c3a','#4eb8e0'] },
+  'Hua Hin':       { id: '1583417319070-4a69db38a482', g: ['#c49a3c','#1a9c7a'] },
+  'Hurghada':      { id: '1523531294919-4bcd7c65e216', g: ['#c47a1a','#1a6fa8'] },
+  'Golden Sands':  { id: '1507525428034-b723cf961d3e', g: ['#d4a843','#1a6fa8'] },
+  'Calabrien':     { id: '1534445538923-ab38cff1bbe1', g: ['#1a7a6c','#e8d870'] },
+  'Kenya Kysten':  { id: '1547471080-7cc2caa01a7e', g: ['#8a3c1a','#e8a854'] },
+};
+
+function destPhoto(name) {
+  const key = Object.keys(DEST_DATA).find(k => name?.toLowerCase().includes(k.toLowerCase()));
+  const d = key ? DEST_DATA[key] : DEST_DATA['Koh Lanta'];
+  // Lokale filnavne
+  const LOCAL = {
+    'Mallorca': 'mallorca.jpg',
+    'Costa del Sol': 'costa_del_sol.jpg',
+    'Costa Blanca': 'costa_blanca.jpg',
+    'Fuerteventura': 'fuerteventura.jpg',
+    'Gran Canaria': 'gran_canaria.jpg',
+    'Tenerife': 'tenerife.jpg',
+    'La Palma': 'la_palma.jpg',
+    'Kreta': 'kreta.jpg',
+    'Rhodos': 'rhodos.jpg',
+    'Zakynthos': 'zakynthos.jpg',
+    'Peloponnes': 'peloponnes.jpg',
+    'Alanya': 'alanya.jpg',
+    'Side': 'side.jpg',
+    'Algarve': 'algarve.jpg',
+    'Azorerne': 'azorerne.jpg',
+    'Phuket': 'phuket.jpg',
+    'Khao Lak': 'khao_lak.jpg',
+    'Koh Lanta': 'koh_lanta.jpg',
+    'Krabi': 'krabi.jpg',
+    'Hua Hin': 'koh_lanta.jpg',
+    'Hurghada': 'hurghada.jpg',
+    'Golden Sands': 'golden_sands.jpg',
+    'Calabrien': 'calabrien.jpg',
+    'Kenya Kysten': 'kenya.jpg',
+  };
+  const localFile = key ? (LOCAL[key] || 'koh_lanta.jpg') : 'koh_lanta.jpg';
+  return {
+    url: `${localFile}`,
+    gradient: `linear-gradient(135deg, ${d.g[0]} 0%, ${d.g[1]} 100%)`,
+  };
+}
+
+/* ─── Brand tokens ─── */
+const C = {
+  navy:    '#1a2b4a',
+  blue:    '#2d5fa6',
+  light:   '#5b8fd4',
+  bg:      '#f0f5fb',
+  gold:    '#d4a843',
+  white:   '#ffffff',
+  gray:    '#6b7280',
+  border:  '#dde6f0',
+};
+
+/* ─── Questions ─── */
+const QUESTIONS = [
+  {
+    id: 'who',
+    q: 'Hvem rejser du med?',
+    opts: [
+      { label: 'Alene', emoji: '🧳' },
+      { label: 'Som par', emoji: '💑' },
+      { label: 'Med venner', emoji: '👥' },
+      { label: 'Med familie', emoji: '👨‍👩‍👧' },
+    ],
+  },
+  {
+    id: 'goal',
+    q: 'Hvad er dit mål med rejsen?',
+    opts: [
+      { label: 'Afslapning og ro', emoji: '🌅' },
+      { label: 'Kultur og seværdigheder', emoji: '🏛️' },
+      { label: 'Eventyr og aktiviteter', emoji: '🏄' },
+      { label: 'Fest og natteliv', emoji: '🎉' },
+      { label: 'Natur og stilhed', emoji: '🌿' },
+    ],
+  },
+  {
+    id: 'dest',
+    q: 'Hvilken type destination?',
+    opts: [
+      { label: 'Strand og hav', emoji: '🏖️' },
+      { label: 'Storby og byliv', emoji: '🏙️' },
+      { label: 'Bjerge og natur', emoji: '⛰️' },
+      { label: 'Hyggelige landsbyer', emoji: '🏡' },
+    ],
+  },
+  {
+    id: 'climate',
+    q: 'Hvilket klima foretrækker du?',
+    opts: [
+      { label: 'Meget varmt 30°C+', emoji: '☀️' },
+      { label: 'Mildt og solrigt 22–28°C', emoji: '🌤️' },
+      { label: 'Tropisk og eksotisk', emoji: '🌴' },
+      { label: 'Vejret er ligegyldigt', emoji: '🌈' },
+    ],
+  },
+  {
+    id: 'activity',
+    q: 'Hvor aktiv vil du være?',
+    opts: [
+      { label: 'Mest afslapning', emoji: '🛌' },
+      { label: 'En blanding', emoji: '🚶' },
+      { label: 'Meget aktiv', emoji: '🚵' },
+    ],
+  },
+  {
+    id: 'type',
+    q: 'Hvilken rejseform?',
+    opts: [
+      { label: 'Klassisk solferie', emoji: '🌞' },
+      { label: 'All Inclusive', emoji: '🍹' },
+      { label: 'Rundrejse', emoji: '🗺️' },
+      { label: 'Safari og natur', emoji: '🦁' },
+      { label: 'Aktiv ferie', emoji: '🏋️' },
+    ],
+  },
+  {
+    id: 'flight',
+    q: 'Hvor langt vil du flyve?',
+    opts: [
+      { label: '0–3 timer', emoji: '✈️' },
+      { label: '3–6 timer', emoji: '✈️✈️' },
+      { label: 'Lang distance', emoji: '🌍' },
+    ],
+  },
+  {
+    id: 'budget',
+    q: 'Budget per person?',
+    opts: [
+      { label: 'Under 4.000 kr.', emoji: '💶' },
+      { label: '4.000–8.000 kr.', emoji: '💰' },
+      { label: '8.000–15.000 kr.', emoji: '💎' },
+      { label: 'Ingen grænse', emoji: '🚀' },
+    ],
+  },
+];
+
+const SYSTEM_PROMPT = `Du er Bravo Tours' AI-rejserådgiver. Bravo Tours er et dansk rejsebureau med sloganet "Med jer hele vejen".
+
+Bravo Tours tilbyder pakkerejser til følgende destinationer:
+- Spanien: Mallorca, Costa del Sol, Costa Blanca
+- Kanariske øer: Fuerteventura, Gran Canaria, Tenerife, La Palma
+- Grækenland: Kreta, Rhodos, Zakynthos, Peloponnes
+- Tyrkiet: Alanya, Side
+- Portugal: Algarve, Azorerne
+- Thailand: Phuket, Khao Lak, Koh Lanta, Krabi, Hua Hin
+- Egypten: Hurghada
+- Bulgarien: Golden Sands
+- Italien: Calabrien
+- Afrika: Kenya Kysten
+
+Rejseformer: solferie, all inclusive, rundrejser, safari, golf, aktiv ferie, krydstogt
+Afrejse fra: Billund, København, Aalborg, Aarhus
+
+URL-struktur på bravotours.dk:
+- Spanien/Mallorca: https://www.bravotours.dk/rejser/spanien/mallorca/
+- Spanien/Costa del Sol: https://www.bravotours.dk/rejser/spanien/costa-del-sol/
+- Spanien/Costa Blanca: https://www.bravotours.dk/rejser/spanien/costa-blanca/
+- Kanariske øer/Fuerteventura: https://www.bravotours.dk/rejser/kanariske-oeer/fuerteventura/
+- Kanariske øer/Gran Canaria: https://www.bravotours.dk/rejser/kanariske-oeer/gran-canaria/
+- Kanariske øer/Tenerife: https://www.bravotours.dk/rejser/kanariske-oeer/tenerife/
+- Kanariske øer/La Palma: https://www.bravotours.dk/rejser/kanariske-oeer/la-palma/
+- Grækenland/Kreta: https://www.bravotours.dk/rejser/graekenland/kreta/
+- Grækenland/Rhodos: https://www.bravotours.dk/rejser/graekenland/rhodos/
+- Grækenland/Zakynthos: https://www.bravotours.dk/rejser/graekenland/zakynthos/
+- Grækenland/Peloponnes: https://www.bravotours.dk/rejser/graekenland/peloponnes/
+- Tyrkiet/Alanya: https://www.bravotours.dk/rejser/tyrkiet/alanya/
+- Tyrkiet/Side: https://www.bravotours.dk/rejser/tyrkiet/side/
+- Portugal/Algarve: https://www.bravotours.dk/rejser/portugal/algarve/
+- Portugal/Azorerne: https://www.bravotours.dk/rejser/portugal/azorerne/
+- Thailand/Phuket: https://www.bravotours.dk/rejser/thailand/phuket/
+- Thailand/Khao Lak: https://www.bravotours.dk/rejser/thailand/khao-lak/
+- Thailand/Koh Lanta: https://www.bravotours.dk/rejser/thailand/koh-lanta/
+- Thailand/Krabi: https://www.bravotours.dk/rejser/thailand/krabi/
+- Thailand/Hua Hin: https://www.bravotours.dk/rejser/thailand/hua-hin/
+- Egypten/Hurghada: https://www.bravotours.dk/rejser/egypten/hurghada/
+- Bulgarien/Golden Sands: https://www.bravotours.dk/rejser/bulgarien/golden-sands/
+- Italien/Calabrien: https://www.bravotours.dk/rejser/italien/calabrien/
+- Kenya/Kenya Kysten: https://www.bravotours.dk/rejser/kenya/kenya-kysten/
+
+Du skal returnere præcis 3 rejseforslag som et JSON-array. Ingen tekst før eller efter — kun JSON.
+
+Format:
+[
+  {
+    "name": "Destination navn",
+    "country": "Land",
+    "emoji": "🌴",
+    "tagline": "Kort poetisk tagline",
+    "description": "2-3 sætninger der beskriver rejsen personligt ud fra brugerens svar",
+    "highlights": ["Highlight 1", "Highlight 2", "Highlight 3"],
+    "travelForm": "Rejseform",
+    "flightTime": "X timer",
+    "priceFrom": "X.XXX kr.",
+    "url": "https://www.bravotours.dk/rejser/..."
+  }
+]
+
+Det første forslag skal være det bedste match. Priser skal være realistiske og varierende.`;
+
+/* ─── Welcome Screen ─── */
+function WelcomeScreen({ onStart }) {
+  return (
+    <div style={{ animation: 'fadeUp 0.4s ease', background: C.white, minHeight: '100%' }}>
+      {/* Hero image — full image visible */}
+      <div style={{ position: 'relative', background: C.navy, overflow: 'hidden' }}>
+        <img
+          src={HERO_FILE}
+          alt="Bravo Tours personale på stranden"
+          style={{ width: '100%', display: 'block', objectFit: 'contain' }}
+        />
+        {/* Gradient overlay bottom */}
+        <div style={{
+          position: 'absolute', bottom: 0, left: 0, right: 0, height: 120,
+          background: 'linear-gradient(transparent, rgba(26,43,74,0.85))',
+        }}/>
+        {/* Logo */}
+        <div style={{ position: 'absolute', top: 16, left: 0, right: 0, textAlign: 'center' }}>
+          <div style={{ fontFamily: 'Playfair Display, serif', color: C.gold, fontSize: 22, fontWeight: 700, letterSpacing: 1 }}>
+            BRAVO TOURS
+          </div>
+          <div style={{ fontSize: 11, color: 'rgba(255,255,255,0.75)', letterSpacing: 0.5, marginTop: 2 }}>Med jer hele vejen</div>
+        </div>
+        {/* Tagline over bottom gradient */}
+        <div style={{ position: 'absolute', bottom: 16, left: 20, right: 20 }}>
+          <h1 style={{
+            fontFamily: 'Playfair Display, serif',
+            fontSize: 22, fontWeight: 700, color: C.white,
+            lineHeight: 1.25, marginBottom: 4,
+          }}>Find din næste drømmerejse</h1>
+          <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>
+            Besvar 8 korte spørgsmål — vi finder de perfekte rejseforslag til dig
+          </p>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div style={{ padding: '24px 22px 28px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 28 }}>
+          {[
+            { icon: '🎯', text: '8 spørgsmål om dine præferencer' },
+            { icon: '🤖', text: 'AI analyserer og matcher destinationer' },
+            { icon: '✈️', text: '3 personlige rejseforslag med priser' },
+          ].map(({ icon, text }) => (
+            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 20, flexShrink: 0 }}>{icon}</span>
+              <span style={{ fontSize: 14, color: '#444', lineHeight: 1.4 }}>{text}</span>
+            </div>
+          ))}
+        </div>
+
+        <button onClick={onStart} style={{
+          width: '100%', padding: '15px 0',
+          borderRadius: 12, border: 'none',
+          background: C.blue, color: C.white,
+          fontSize: 16, fontWeight: 600,
+          cursor: 'pointer',
+          fontFamily: 'DM Sans, sans-serif',
+          boxShadow: '0 6px 18px rgba(45,95,166,0.35)',
+          letterSpacing: 0.2,
+        }}>
+          Start rejseguiden ✨
+        </button>
+        <p style={{ textAlign: 'center', fontSize: 11, color: C.gray, marginTop: 10 }}>
+          Tager ca. 2 minutter
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Progress Bar ─── */
+function ProgressBar({ current, total }) {
+  const pct = ((current) / total) * 100;
+  return (
+    <div style={{ height: 3, background: 'rgba(255,255,255,0.15)' }}>
+      <div style={{
+        height: '100%',
+        width: `${pct}%`,
+        background: C.gold,
+        transition: 'width 0.4s ease',
+        borderRadius: '0 2px 2px 0',
+      }}/>
+    </div>
+  );
+}
+
+/* ─── Chip option ─── */
+function Chip({ emoji, label, selected, onClick }) {
+  return (
+    <button onClick={onClick} style={{
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8,
+      padding: '10px 16px',
+      borderRadius: 12,
+      border: `2px solid ${selected ? C.blue : C.border}`,
+      background: selected ? 'rgba(45,95,166,0.08)' : C.white,
+      boxShadow: selected ? `0 0 0 3px rgba(45,95,166,0.15), inset 0 0 0 1px ${C.blue}` : '0 1px 3px rgba(0,0,0,0.06)',
+      cursor: 'pointer',
+      transition: 'all 0.15s ease',
+      width: '100%',
+      textAlign: 'left',
+    }}>
+      <span style={{ fontSize: 22, lineHeight: 1 }}>{emoji}</span>
+      <span style={{
+        fontSize: 15,
+        fontWeight: selected ? 600 : 400,
+        color: selected ? C.blue : C.navy,
+        fontFamily: 'DM Sans, sans-serif',
+      }}>{label}</span>
+      {selected && (
+        <span style={{
+          marginLeft: 'auto',
+          width: 20, height: 20,
+          borderRadius: '50%',
+          background: C.blue,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          fontSize: 11, color: 'white', fontWeight: 700, flexShrink: 0,
+        }}>✓</span>
+      )}
+    </button>
+  );
+}
+
+/* ─── Quiz Screen ─── */
+function QuizScreen({ step, answers, onToggle, onNext, onBack }) {
+  const q = QUESTIONS[step];
+  const sel = answers[q.id] || [];
+  const canNext = sel.length > 0;
+
+  return (
+    <div style={{ animation: 'fadeUp 0.3s ease', padding: '20px 20px 24px' }}>
+      <div style={{ marginBottom: 6 }}>
+        <span style={{ fontSize: 11, color: C.gray, textTransform: 'uppercase', letterSpacing: 0.8, fontWeight: 600 }}>
+          Spørgsmål {step + 1} af {QUESTIONS.length}
+        </span>
+      </div>
+      <h2 style={{
+        fontFamily: 'Playfair Display, serif',
+        fontSize: 22,
+        fontWeight: 700,
+        color: C.navy,
+        marginBottom: 6,
+        lineHeight: 1.25,
+      }}>{q.q}</h2>
+      <p style={{ fontSize: 12, color: C.gray, marginBottom: 18 }}>Vælg én eller flere</p>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 20 }}>
+        {q.opts.map(o => (
+          <Chip
+            key={o.label}
+            emoji={o.emoji}
+            label={o.label}
+            selected={sel.includes(o.label)}
+            onClick={() => onToggle(q.id, o.label)}
+          />
+        ))}
+      </div>
+
+      <div style={{ display: 'flex', gap: 8 }}>
+        {step > 0 && (
+          <button onClick={onBack} style={{
+            padding: '12px 16px',
+            borderRadius: 10,
+            border: `1.5px solid ${C.border}`,
+            background: 'transparent',
+            color: C.gray,
+            fontSize: 14,
+            cursor: 'pointer',
+            fontFamily: 'DM Sans, sans-serif',
+          }}>← Tilbage</button>
+        )}
+        <button onClick={onNext} disabled={!canNext} style={{
+          flex: 1,
+          padding: '13px 0',
+          borderRadius: 10,
+          border: 'none',
+          background: canNext ? C.blue : C.border,
+          color: canNext ? C.white : C.gray,
+          fontSize: 15,
+          fontWeight: 600,
+          cursor: canNext ? 'pointer' : 'default',
+          fontFamily: 'DM Sans, sans-serif',
+          transition: 'all 0.15s ease',
+          boxShadow: canNext ? '0 4px 12px rgba(45,95,166,0.3)' : 'none',
+        }}>
+          {step < QUESTIONS.length - 1 ? 'Næste →' : 'Find mine rejser ✨'}
+        </button>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Loading Screen ─── */
+function LoadingScreen({ answers }) {
+  const tags = Object.values(answers).flat().slice(0, 6);
+  const [dotIdx, setDotIdx] = useState(0);
+  const msgs = [
+    'Analyserer dine rejsepræferencer...',
+    'Matcher med 24 destinationer...',
+    'Finder de bedste tilbud...',
+    'Sammensætter dine personlige forslag...',
+  ];
+
+  useEffect(() => {
+    const t = setInterval(() => setDotIdx(i => (i + 1) % msgs.length), 1800);
+    return () => clearInterval(t);
+  }, []);
+
+  return (
+    <div style={{ padding: '36px 24px', textAlign: 'center', animation: 'fadeUp 0.4s ease' }}>
+      <div style={{ fontSize: 52, marginBottom: 8, animation: 'planefly 2s ease-in-out infinite' }}>✈️</div>
+      <h2 style={{
+        fontFamily: 'Playfair Display, serif',
+        fontSize: 20,
+        color: C.navy,
+        marginBottom: 6,
+      }}>Finder dine drømmerejser</h2>
+      <p style={{
+        fontSize: 13,
+        color: C.gray,
+        marginBottom: 28,
+        minHeight: 20,
+        animation: 'pulse 0.5s ease',
+        key: dotIdx,
+      }}>{msgs[dotIdx]}</p>
+
+      <div style={{ marginBottom: 28 }}>
+        <span className="dot" style={{display:'inline-block',width:9,height:9,borderRadius:'50%',background:C.blue,animation:'bounce 1.4s ease infinite',margin:'0 4px'}}/>
+        <span className="dot" style={{display:'inline-block',width:9,height:9,borderRadius:'50%',background:C.blue,animation:'bounce 1.4s ease .2s infinite',margin:'0 4px'}}/>
+        <span className="dot" style={{display:'inline-block',width:9,height:9,borderRadius:'50%',background:C.blue,animation:'bounce 1.4s ease .4s infinite',margin:'0 4px'}}/>
+      </div>
+
+      <div style={{
+        background: C.bg,
+        borderRadius: 12,
+        padding: '14px 16px',
+        textAlign: 'left',
+      }}>
+        <div style={{ fontSize: 11, color: C.light, fontWeight: 600, marginBottom: 8, textTransform: 'uppercase', letterSpacing: 0.6 }}>
+          Dine præferencer
+        </div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+          {tags.map((t, i) => (
+            <span key={i} style={{
+              background: 'rgba(45,95,166,0.1)',
+              color: C.blue,
+              borderRadius: 20,
+              padding: '3px 10px',
+              fontSize: 12,
+              fontWeight: 500,
+            }}>{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Result Card ─── */
+function ResultCard({ trip, best, idx }) {
+  const [expanded, setExpanded] = useState(idx === 0);
+  return (
+    <div style={{
+      border: `2px solid ${best ? C.gold : C.border}`,
+      borderRadius: 16,
+      overflow: 'hidden',
+      background: C.white,
+      marginBottom: 12,
+      animation: `fadeUp ${0.3 + idx * 0.1}s ease`,
+      boxShadow: best ? `0 4px 20px rgba(212,168,67,0.2)` : '0 2px 8px rgba(0,0,0,0.06)',
+    }}>
+      {/* Destination photo banner */}
+      {(() => {
+        const { url, gradient } = destPhoto(trip.name);
+        return (
+          <div style={{ height: best ? 150 : 100, position: 'relative', overflow: 'hidden', background: gradient }}>
+            <img src={url} alt={trip.name}
+              style={{ position:'absolute', inset:0, width:'100%', height:'100%', objectFit:'cover', display:'block' }}
+              onError={e => { e.target.style.display='none'; }}
+            />
+            <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.5) 100%)' }}/>
+            {best && (
+              <div style={{ position:'absolute', top:10, left:10, zIndex:2, background:C.gold, color:'white', fontSize:10, fontWeight:700, padding:'4px 10px', borderRadius:20, letterSpacing:0.5 }}>
+                ⭐ BEDSTE MATCH
+              </div>
+            )}
+            <div style={{ position:'absolute', bottom:10, left:14, zIndex:2 }}>
+              <div style={{ fontFamily:'Playfair Display, serif', fontSize: best ? 20 : 15, fontWeight:700, color:'white', textShadow:'0 1px 6px rgba(0,0,0,0.5)' }}>
+                {trip.name}
+              </div>
+              <div style={{ fontSize:11, color:'rgba(255,255,255,0.8)', marginTop:1 }}>{trip.country}</div>
+            </div>
+            <div style={{ position:'absolute', bottom:10, right:12, zIndex:2, fontSize: best ? 30 : 22, filter:'drop-shadow(0 2px 4px rgba(0,0,0,0.4))' }}>{trip.emoji}</div>
+          </div>
+        );
+      })()}
+
+      <div style={{ padding: '12px 14px' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 4 }}>
+          <div>
+            <h3 style={{
+              fontFamily: 'Playfair Display, serif',
+              fontSize: best ? 17 : 14,
+              fontWeight: 700,
+              color: C.navy,
+              marginBottom: 2,
+              display: 'none',
+            }}>{trip.name}</h3>
+            <div style={{ fontSize: 11, color: C.gray }}>{trip.country} · {trip.travelForm}</div>
+          </div>
+          <div style={{ textAlign: 'right', flexShrink: 0, marginLeft: 10 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: C.blue }}>fra {trip.priceFrom}</div>
+            <div style={{ fontSize: 10, color: C.gray }}>✈️ {trip.flightTime}</div>
+          </div>
+        </div>
+
+        {best && (
+          <p style={{ fontSize: 12, color: '#555', lineHeight: 1.6, marginBottom: 10, fontStyle: 'italic', color: C.gray }}>
+            "{trip.tagline}"
+          </p>
+        )}
+
+        {expanded && (
+          <div style={{ animation: 'fadeUp 0.2s ease' }}>
+            <p style={{ fontSize: 12, color: '#444', lineHeight: 1.65, marginBottom: 10 }}>
+              {trip.description}
+            </p>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, marginBottom: 12 }}>
+              {(trip.highlights || []).map((h, i) => (
+                <span key={i} style={{
+                  border: `1.5px solid ${C.border}`,
+                  color: C.navy,
+                  borderRadius: 20,
+                  padding: '3px 10px',
+                  fontSize: 11,
+                }}>✓ {h}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {!best && !expanded && (
+          <button onClick={() => setExpanded(true)} style={{
+            background: 'none', border: 'none', color: C.light, fontSize: 12,
+            cursor: 'pointer', padding: '2px 0', fontFamily: 'DM Sans, sans-serif',
+            marginBottom: 6, display: 'block',
+          }}>
+            Vis detaljer ↓
+          </button>
+        )}
+
+        <a href={trip.url} target="_blank" rel="noopener" style={{
+          display: 'block',
+          background: best ? C.blue : C.bg,
+          color: best ? C.white : C.blue,
+          borderRadius: 10,
+          padding: '10px 0',
+          textAlign: 'center',
+          fontSize: 13,
+          fontWeight: 600,
+          textDecoration: 'none',
+          border: best ? 'none' : `1.5px solid ${C.border}`,
+          transition: 'opacity 0.15s',
+        }}>
+          Se rejsen på Bravo Tours →
+        </a>
+      </div>
+    </div>
+  );
+}
+
+/* ─── Results Screen ─── */
+function ResultsScreen({ results, onReset }) {
+  return (
+    <div style={{ padding: '16px 16px 24px', animation: 'fadeUp 0.4s ease' }}>
+      <div style={{ marginBottom: 16, textAlign: 'center' }}>
+        <div style={{ fontSize: 32, marginBottom: 6 }}>✨</div>
+        <h2 style={{
+          fontFamily: 'Playfair Display, serif',
+          fontSize: 21,
+          fontWeight: 700,
+          color: C.navy,
+          marginBottom: 4,
+        }}>Dine personlige rejseforslag</h2>
+        <p style={{ fontSize: 12, color: C.gray }}>Udvalgt af AI baseret på dine svar</p>
+      </div>
+
+      {results.map((trip, i) => (
+        <ResultCard key={i} trip={trip} best={i === 0} idx={i} />
+      ))}
+
+      <button onClick={onReset} style={{
+        width: '100%',
+        padding: '12px 0',
+        borderRadius: 10,
+        border: `2px dashed ${C.border}`,
+        background: 'transparent',
+        color: C.gray,
+        fontSize: 14,
+        cursor: 'pointer',
+        fontFamily: 'DM Sans, sans-serif',
+        marginTop: 4,
+      }}>
+        ↺ Tag testen igen
+      </button>
+    </div>
+  );
+}
+
+/* ─── Error Screen ─── */
+function ErrorScreen({ message, onRetry }) {
+  return (
+    <div style={{ padding: '40px 24px', textAlign: 'center' }}>
+      <div style={{ fontSize: 40, marginBottom: 12 }}>😕</div>
+      <h3 style={{ fontFamily: 'Playfair Display, serif', fontSize: 18, color: C.navy, marginBottom: 8 }}>
+        Noget gik galt
+      </h3>
+      <p style={{ fontSize: 13, color: C.gray, marginBottom: 20, lineHeight: 1.6 }}>{message}</p>
+      <button onClick={onRetry} style={{
+        padding: '12px 28px', borderRadius: 10, border: 'none',
+        background: C.blue, color: 'white', fontSize: 14, fontWeight: 600,
+        cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+      }}>Prøv igen</button>
+    </div>
+  );
+}
+
+/* ─── Main App ─── */
+function BravoApp() {
+  const STORAGE_KEY = 'bravo_quiz_state';
+  const saved = (() => { try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null'); } catch { return null; } })();
+
+  const [step, setStep] = useState(saved?.step ?? 0);
+  const [answers, setAnswers] = useState(saved?.answers ?? {});
+  const [phase, setPhase] = useState(() => {
+    if (!saved) return 'welcome';
+    // Don't restore 'welcome' or 'loading' from storage; map quiz@step0/no-answers back to welcome
+    if (saved.phase === 'welcome') return 'welcome';
+    if (saved.phase === 'loading') return 'quiz';
+    if (saved.phase === 'quiz' && saved.step === 0 && Object.keys(saved.answers || {}).length === 0) return 'welcome';
+    return saved.phase ?? 'welcome';
+  }); // quiz | loading | results | error
+  const [results, setResults] = useState(saved?.results ?? []);
+  const [errorMsg, setErrorMsg] = useState('');
+
+  useEffect(() => {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify({ step, answers, phase, results }));
+  }, [step, answers, phase, results]);
+
+  const toggle = (id, val) => {
+    setAnswers(prev => {
+      const cur = prev[id] || [];
+      return { ...prev, [id]: cur.includes(val) ? cur.filter(x => x !== val) : [...cur, val] };
+    });
+  };
+
+  const next = async () => {
+    if (step < QUESTIONS.length - 1) {
+      setStep(s => s + 1);
+    } else {
+      setPhase('loading');
+      try {
+        const userMsg = QUESTIONS.map(q => `${q.q}: ${(answers[q.id] || []).join(', ')}`).join('\n');
+        const raw = await window.claude.complete({
+          messages: [{ role: 'user', content: `Brugerens svar:\n${userMsg}\n\nGiv mig 3 personlige rejseforslag som JSON-array.` }],
+          system: SYSTEM_PROMPT,
+        });
+        const match = raw.match(/\[[\s\S]*\]/);
+        if (!match) throw new Error('Ugyldigt svar fra AI');
+        const trips = JSON.parse(match[0]);
+        setResults(trips);
+        setPhase('results');
+      } catch (e) {
+        setErrorMsg(e.message || 'Kunne ikke generere forslag. Prøv igen.');
+        setPhase('error');
+      }
+    }
+  };
+
+  const reset = () => {
+    setStep(0); setAnswers({}); setPhase('welcome'); setResults([]);
+    localStorage.removeItem(STORAGE_KEY);
+  };
+
+  const innerContent = (
+    <div style={{
+      width: '100%',
+      height: '100%',
+      overflowY: 'auto',
+      background: C.bg,
+    }}>
+      {/* Header — hidden on welcome */}
+      {phase !== 'welcome' && <div style={{ background: C.navy, position: 'sticky', top: 0, zIndex: 10 }}>
+        <div style={{
+          padding: '12px 20px 10px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        }}>
+          <div>
+            <div style={{
+              fontFamily: 'Playfair Display, serif',
+              color: C.gold, fontSize: 18, fontWeight: 700, letterSpacing: 0.3,
+            }}>BRAVO TOURS</div>
+            <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.5)', letterSpacing: 0.3 }}>Med jer hele vejen</div>
+          </div>
+          {phase === 'quiz' && (
+            <div style={{
+              background: 'rgba(255,255,255,0.1)',
+              borderRadius: 20, padding: '4px 12px',
+              fontSize: 12, color: 'rgba(255,255,255,0.7)',
+              fontWeight: 600,
+            }}>
+              {step + 1} / {QUESTIONS.length}
+            </div>
+          )}
+          {phase === 'results' && (
+            <button onClick={reset} style={{
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.3)',
+              borderRadius: 20, padding: '4px 12px',
+              fontSize: 11, color: 'rgba(255,255,255,0.6)',
+              cursor: 'pointer', fontFamily: 'DM Sans, sans-serif',
+            }}>↺ Start forfra</button>
+          )}
+        </div>
+        {phase === 'quiz' && <ProgressBar current={step + 1} total={QUESTIONS.length} />}
+        {phase === 'loading' && (
+          <div style={{ height: 3, background: 'rgba(255,255,255,0.15)', overflow: 'hidden' }}>
+            <div style={{
+              height: '100%', width: '40%',
+              background: C.gold,
+              animation: 'shimmer 1.5s ease infinite',
+              backgroundImage: `linear-gradient(90deg, ${C.gold} 0%, #f0c96a 50%, ${C.gold} 100%)`,
+              backgroundSize: '400px 100%',
+            }}/>
+          </div>
+        )}
+      </div>}
+
+      {/* Content */}
+      <div style={{ maxWidth: 440, margin: '0 auto' }}>
+        {phase === 'welcome' && <WelcomeScreen onStart={() => setPhase('quiz')} />}
+        {phase === 'quiz'    && <QuizScreen step={step} answers={answers} onToggle={toggle} onNext={next} onBack={() => setStep(s => s - 1)} />}
+        {phase === 'loading' && <LoadingScreen answers={answers} />}
+        {phase === 'results' && <ResultsScreen results={results} onReset={reset} />}
+        {phase === 'error'   && <ErrorScreen message={errorMsg} onRetry={() => setPhase('quiz')} />}
+      </div>
+    </div>
+  );
+
+  return (
+    <ChromeWindow
+      tabs={[{ title: 'Bravo Tours – Find din rejse' }]}
+      url="www.bravotours.dk/rejsegenerator"
+      width={520}
+      height={720}
+    >
+      {innerContent}
+    </ChromeWindow>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<BravoApp/>);
+</script>
+<div id="root"></div>
+</body>
+</html>
