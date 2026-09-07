@@ -77,7 +77,7 @@ body {
 </head>
 <body>
 <script>
-const HERO_FILE = window.__resources && window.__resources.heroImg ? window.__resources.heroImg : "hero-small.jpg";
+const HERO_FILE = window.__resources && window.__resources.heroImg ? window.__resources.heroImg : "images/hero-small.jpg";
 </script>
 <script type="text/babel">
 
@@ -186,7 +186,7 @@ function destPhoto(name) {
   };
   const localFile = key ? (LOCAL[key] || 'koh_lanta.jpg') : 'koh_lanta.jpg';
   return {
-    url: `${localFile}`,
+    url: `images/${localFile}`,
     gradient: `linear-gradient(135deg, ${d.g[0]} 0%, ${d.g[1]} 100%)`,
   };
 }
@@ -779,6 +779,290 @@ function ErrorScreen({ message, onRetry }) {
   );
 }
 
+/* ─── Lokal rejseanbefaling (erstatter AI-kaldet, så appen kan køre alle steder) ─── */
+const REC = [
+  { name:'Mallorca', country:'Spanien', emoji:'🏖️', url:'https://www.bravotours.dk/rejser/spanien/mallorca/',
+    flightTime:'ca. 3 timer', flightHours:3, priceFrom:'3.499 kr.', priceLevel:2,
+    climate:['mild','hot'], goals:['relax','party','culture'], types:['beach','city','village'], activity:2,
+    forms:['solferie','all-inclusive'], who:['couple','friends','family'],
+    tagline:'Middelhavets alsidige perle',
+    description:'Mallorca har det hele — livlige strandbyer, hyggelige bjerglandsbyer og en gammel bydel i Palma. Kort flyvetid gør øen perfekt til en afbudsferie eller en uge i solen.',
+    highlights:['Charmerende gamle Palma','Smukke bugter og strande','Nem og kort rejse fra Danmark'] },
+
+  { name:'Costa del Sol', country:'Spanien', emoji:'⛳', url:'https://www.bravotours.dk/rejser/spanien/costa-del-sol/',
+    flightTime:'ca. 3½ time', flightHours:3.5, priceFrom:'3.799 kr.', priceLevel:2,
+    climate:['mild','hot'], goals:['relax','culture'], types:['beach','city'], activity:2,
+    forms:['solferie','active'], who:['couple','family','friends'],
+    tagline:'Solkysten med golf og livsnydelse',
+    description:'Costa del Sol byder på lange strande, hvide landsbyer og nogle af Europas bedste golfbaner. En klassiker for dem der vil have sol, hygge og god mad.',
+    highlights:['Fremragende golfbaner','Hyggelige andalusiske byer','Lang strandpromenade'] },
+
+  { name:'Costa Blanca', country:'Spanien', emoji:'🌞', url:'https://www.bravotours.dk/rejser/spanien/costa-blanca/',
+    flightTime:'ca. 3½ time', flightHours:3.5, priceFrom:'3.299 kr.', priceLevel:1,
+    climate:['mild','hot'], goals:['relax'], types:['beach','city'], activity:1,
+    forms:['solferie','all-inclusive'], who:['family','couple'],
+    tagline:'Den hvide kyst til hele familien',
+    description:'Costa Blanca er kendt for sit milde klima og børnevenlige strande. Et trygt og prisvenligt valg til en afslappet solferie.',
+    highlights:['Børnevenlige strande','Godt vejr næsten hele året','Prisvenligt'] },
+
+  { name:'Fuerteventura', country:'Kanariske øer', emoji:'🏄', url:'https://www.bravotours.dk/rejser/kanariske-oeer/fuerteventura/',
+    flightTime:'ca. 5½ time', flightHours:5.5, priceFrom:'4.299 kr.', priceLevel:2,
+    climate:['mild','hot'], goals:['relax','adventure'], types:['beach'], activity:2,
+    forms:['solferie','active'], who:['couple','friends'],
+    tagline:'Endeløse strande og vind i håret',
+    description:'Fuerteventura har Kanariernes flotteste sandstrande og et lækkert klima året rundt. Et paradis for surfere og alle der elsker hav og vind.',
+    highlights:['Kilometerlange sandstrande','Perfekt til surf og kite','Sol hele året'] },
+
+  { name:'Gran Canaria', country:'Kanariske øer', emoji:'🌅', url:'https://www.bravotours.dk/rejser/kanariske-oeer/gran-canaria/',
+    flightTime:'ca. 5½ time', flightHours:5.5, priceFrom:'3.999 kr.', priceLevel:2,
+    climate:['mild','hot'], goals:['relax','party'], types:['beach','city'], activity:2,
+    forms:['solferie','all-inclusive'], who:['couple','friends','family'],
+    tagline:'En miniature-verdensdel i Atlanten',
+    description:'Gran Canaria kaldes et kontinent i miniature — fra klitterne i Maspalomas til grønne bjerge indenlands. Sol året rundt og masser af liv.',
+    highlights:['Klitterne ved Maspalomas','Sol hele året','Fra fest til afslapning'] },
+
+  { name:'Tenerife', country:'Kanariske øer', emoji:'⛰️', url:'https://www.bravotours.dk/rejser/kanariske-oeer/tenerife/',
+    flightTime:'ca. 5½ time', flightHours:5.5, priceFrom:'4.199 kr.', priceLevel:2,
+    climate:['mild','hot'], goals:['relax','adventure','nature'], types:['beach','mountain'], activity:2,
+    forms:['solferie','active'], who:['couple','family','friends'],
+    tagline:'Strand og vulkan i ét',
+    description:'Tenerife kombinerer solsikre strande med den mægtige vulkan Teide. Perfekt hvis du vil have både badeferie og naturoplevelser.',
+    highlights:['Vulkanen Teide','Både strand og bjerge','Sol året rundt'] },
+
+  { name:'La Palma', country:'Kanariske øer', emoji:'🌿', url:'https://www.bravotours.dk/rejser/kanariske-oeer/la-palma/',
+    flightTime:'ca. 6 timer', flightHours:6, priceFrom:'4.999 kr.', priceLevel:2,
+    climate:['mild'], goals:['nature','adventure'], types:['mountain','village'], activity:3,
+    forms:['active','solferie'], who:['couple','alone'],
+    tagline:'Den grønne ø for vandrere',
+    description:'La Palma er Kanariernes grønneste og roligste ø, med frodige skove og fantastiske vandreruter. Et paradis for naturelskere og stjernekiggere.',
+    highlights:['Vandring i frodig natur','Verdens klareste stjernehimmel','Rolig og uspoleret'] },
+
+  { name:'Kreta', country:'Grækenland', emoji:'🏛️', url:'https://www.bravotours.dk/rejser/graekenland/kreta/',
+    flightTime:'ca. 3½ time', flightHours:3.5, priceFrom:'3.799 kr.', priceLevel:2,
+    climate:['hot','mild'], goals:['relax','culture'], types:['beach','village'], activity:2,
+    forms:['solferie','all-inclusive'], who:['couple','family','friends'],
+    tagline:'Grækenlands største med sjæl',
+    description:'Kreta forener smukke strande, gammel historie og fantastisk græsk mad. En ø der passer til både familier, par og kulturelskere.',
+    highlights:['Minoisk historie i Knossos','Skønne strande','Ægte græsk gæstfrihed'] },
+
+  { name:'Rhodos', country:'Grækenland', emoji:'🎉', url:'https://www.bravotours.dk/rejser/graekenland/rhodos/',
+    flightTime:'ca. 3½ time', flightHours:3.5, priceFrom:'3.699 kr.', priceLevel:2,
+    climate:['hot','mild'], goals:['party','culture','relax'], types:['beach','city'], activity:2,
+    forms:['all-inclusive','solferie'], who:['friends','couple','family'],
+    tagline:'Solskin, historie og natteliv',
+    description:'Rhodos har en af Grækenlands mest velbevarede middelalderbyer og masser af liv. Perfekt hvis du vil have både kultur, strand og fest.',
+    highlights:['Middelalderbyen i Rhodos','Livligt natteliv','Rigtig mange soltimer'] },
+
+  { name:'Zakynthos', country:'Grækenland', emoji:'💙', url:'https://www.bravotours.dk/rejser/graekenland/zakynthos/',
+    flightTime:'ca. 3½ time', flightHours:3.5, priceFrom:'3.899 kr.', priceLevel:2,
+    climate:['hot','mild'], goals:['relax','nature'], types:['beach'], activity:1,
+    forms:['solferie','all-inclusive'], who:['couple','friends'],
+    tagline:'Turkisblå vand og Navagio-bugten',
+    description:'Zakynthos er kendt for den ikoniske Navagio-strand og krystalklart vand. En romantisk ø for jer der bare vil slappe af ved havet.',
+    highlights:['Den berømte Navagio-bugt','Krystalklart vand','Afslappet stemning'] },
+
+  { name:'Peloponnes', country:'Grækenland', emoji:'🗺️', url:'https://www.bravotours.dk/rejser/graekenland/peloponnes/',
+    flightTime:'ca. 3½ time', flightHours:3.5, priceFrom:'5.499 kr.', priceLevel:3,
+    climate:['hot','mild'], goals:['culture','nature'], types:['village','mountain','beach'], activity:2,
+    forms:['roundtrip','solferie'], who:['couple','alone'],
+    tagline:'Det klassiske Grækenland',
+    description:'Peloponnes er fyldt med antikke seværdigheder, olivenlunde og charmerende landsbyer. Ideel til en rundrejse i det oprindelige Grækenland.',
+    highlights:['Antikke Olympia og Mykene','Autentiske landsbyer','Skøn natur og kyst'] },
+
+  { name:'Alanya', country:'Tyrkiet', emoji:'☀️', url:'https://www.bravotours.dk/rejser/tyrkiet/alanya/',
+    flightTime:'ca. 4 timer', flightHours:4, priceFrom:'3.299 kr.', priceLevel:1,
+    climate:['hot'], goals:['relax','party'], types:['beach','city'], activity:2,
+    forms:['all-inclusive','solferie'], who:['family','friends','couple'],
+    tagline:'Sol, all inclusive og valuta for pengene',
+    description:'Alanya giver dig masser af sol, lange strande og et fantastisk udvalg af all inclusive-hoteller til en skarp pris. Et sikkert hit for familier.',
+    highlights:['Rigtig mange soltimer','Stort udvalg af all inclusive','Meget for pengene'] },
+
+  { name:'Side', country:'Tyrkiet', emoji:'🏺', url:'https://www.bravotours.dk/rejser/tyrkiet/side/',
+    flightTime:'ca. 4 timer', flightHours:4, priceFrom:'3.499 kr.', priceLevel:1,
+    climate:['hot'], goals:['relax','culture'], types:['beach','village'], activity:1,
+    forms:['all-inclusive','solferie'], who:['family','couple'],
+    tagline:'Antikke ruiner ved stranden',
+    description:'Side forener afslappet strandferie med gamle romerske ruiner midt i byen. En hyggelig og prisvenlig destination med masser af sol.',
+    highlights:['Romersk tempel ved havet','Hyggelig gågade','Prisvenlig all inclusive'] },
+
+  { name:'Algarve', country:'Portugal', emoji:'⛳', url:'https://www.bravotours.dk/rejser/portugal/algarve/',
+    flightTime:'ca. 4 timer', flightHours:4, priceFrom:'3.999 kr.', priceLevel:2,
+    climate:['mild'], goals:['relax','culture'], types:['beach','village'], activity:2,
+    forms:['solferie','active'], who:['couple','family','friends'],
+    tagline:'Dramatiske klipper og golf',
+    description:'Algarve har Portugals smukkeste kyst med gyldne klipper, hyggelige fiskerbyer og verdensklasse-golf. Skøn mad og venlige mennesker oven i.',
+    highlights:['Dramatiske klippekyster','Fremragende golf','Lækker portugisisk mad'] },
+
+  { name:'Azorerne', country:'Portugal', emoji:'🌋', url:'https://www.bravotours.dk/rejser/portugal/azorerne/',
+    flightTime:'ca. 5½ time', flightHours:5.5, priceFrom:'5.999 kr.', priceLevel:3,
+    climate:['mild'], goals:['nature','adventure'], types:['mountain','village'], activity:3,
+    forms:['active','roundtrip'], who:['couple','alone'],
+    tagline:'Atlantens vilde grønne øer',
+    description:'Azorerne er et eventyr af vulkankratere, varme kilder og grønne bjerge midt i Atlanten. For jer der elsker natur, vandring og ægte ro.',
+    highlights:['Vulkanske kratersøer','Hvalsafari','Uspoleret natur'] },
+
+  { name:'Phuket', country:'Thailand', emoji:'🌴', url:'https://www.bravotours.dk/rejser/thailand/phuket/',
+    flightTime:'ca. 12 timer', flightHours:12, priceFrom:'7.999 kr.', priceLevel:3,
+    climate:['tropical'], goals:['relax','party','adventure'], types:['beach','city'], activity:2,
+    forms:['solferie'], who:['couple','friends'],
+    tagline:'Thailands livlige tropeperle',
+    description:'Phuket er Thailands mest kendte ø med palmestrande, tempeludflugter og et pulserende natteliv. Alt fra romantik til fest under palmerne.',
+    highlights:['Tropiske palmestrande','Sejlture til Phi Phi-øerne','Livligt natteliv'] },
+
+  { name:'Khao Lak', country:'Thailand', emoji:'🐚', url:'https://www.bravotours.dk/rejser/thailand/khao-lak/',
+    flightTime:'ca. 12 timer', flightHours:12, priceFrom:'8.499 kr.', priceLevel:3,
+    climate:['tropical'], goals:['relax','nature'], types:['beach','village'], activity:1,
+    forms:['solferie'], who:['couple','family'],
+    tagline:'Rolige strande og junglenatur',
+    description:'Khao Lak er den afslappede modsætning til Phuket — brede strande, frodig jungle og fred og ro. Perfekt til den rene afkobling.',
+    highlights:['Lange, rolige strande','Jungle og nationalparker','Dykning i verdensklasse'] },
+
+  { name:'Koh Lanta', country:'Thailand', emoji:'🏝️', url:'https://www.bravotours.dk/rejser/thailand/koh-lanta/',
+    flightTime:'ca. 13 timer', flightHours:13, priceFrom:'8.999 kr.', priceLevel:3,
+    climate:['tropical'], goals:['relax','nature'], types:['beach','village'], activity:1,
+    forms:['solferie'], who:['couple','family','alone'],
+    tagline:'Afslappet ø-liv på thailandsk',
+    description:'Koh Lanta er en laid-back ø med bløde strande, gode restauranter og en helt afslappet stemning. Til dig der bare vil koble helt af.',
+    highlights:['Afslappet ø-stemning','Smukke solnedgange','Lækker street food'] },
+
+  { name:'Krabi', country:'Thailand', emoji:'🧗', url:'https://www.bravotours.dk/rejser/thailand/krabi/',
+    flightTime:'ca. 12½ time', flightHours:12.5, priceFrom:'8.499 kr.', priceLevel:3,
+    climate:['tropical'], goals:['adventure','nature','relax'], types:['beach','mountain'], activity:3,
+    forms:['active','solferie'], who:['couple','friends'],
+    tagline:'Kalkklipper og eventyr',
+    description:'Krabi er kendt for sine dramatiske kalkstensklipper, klatring og ø-hop i turkist vand. Til jer der vil have eventyr og natur med badeferie.',
+    highlights:['Dramatiske kalkklipper','Ø-hop og kajak','Klatring og vandring'] },
+
+  { name:'Hua Hin', country:'Thailand', emoji:'🌺', url:'https://www.bravotours.dk/rejser/thailand/hua-hin/',
+    flightTime:'ca. 12 timer', flightHours:12, priceFrom:'8.999 kr.', priceLevel:3,
+    climate:['tropical'], goals:['relax','culture'], types:['beach','city'], activity:2,
+    forms:['solferie','active'], who:['couple','family'],
+    tagline:'Kongelig badeby med golf',
+    description:'Hua Hin er thailændernes egen feriefavorit — en behagelig badeby med paladser, natmarkeder og fine golfbaner. Afslappet og autentisk.',
+    highlights:['Livlige natmarkeder','Gode golfbaner','Rolig, familievenlig by'] },
+
+  { name:'Hurghada', country:'Egypten', emoji:'🤿', url:'https://www.bravotours.dk/rejser/egypten/hurghada/',
+    flightTime:'ca. 5 timer', flightHours:5, priceFrom:'3.599 kr.', priceLevel:1,
+    climate:['hot'], goals:['relax','adventure'], types:['beach'], activity:2,
+    forms:['all-inclusive','active'], who:['couple','family','friends'],
+    tagline:'Det Røde Havs dykkerparadis',
+    description:'Hurghada byder på sol året rundt, all inclusive til skarpe priser og noget af verdens bedste snorkling og dykning i Det Røde Hav.',
+    highlights:['Farverige koralrev','Sol hele året','Billig all inclusive'] },
+
+  { name:'Golden Sands', country:'Bulgarien', emoji:'🍹', url:'https://www.bravotours.dk/rejser/bulgarien/golden-sands/',
+    flightTime:'ca. 3 timer', flightHours:3, priceFrom:'2.999 kr.', priceLevel:1,
+    climate:['hot','mild'], goals:['party','relax'], types:['beach'], activity:2,
+    forms:['all-inclusive','solferie'], who:['friends','family'],
+    tagline:'Billig sol og feststemning',
+    description:'Golden Sands er Bulgariens livlige badeby med lang sandstrand, billig all inclusive og masser af natteliv. Perfekt til vennegruppen.',
+    highlights:['Meget billig ferie','Lang gylden sandstrand','Godt natteliv'] },
+
+  { name:'Calabrien', country:'Italien', emoji:'🍋', url:'https://www.bravotours.dk/rejser/italien/calabrien/',
+    flightTime:'ca. 3½ time', flightHours:3.5, priceFrom:'4.299 kr.', priceLevel:2,
+    climate:['hot','mild'], goals:['relax','culture'], types:['beach','village'], activity:1,
+    forms:['solferie'], who:['couple','family'],
+    tagline:'Autentisk italiensk kyst',
+    description:'Calabrien er Italiens uspolerede tå med turkise strande, charmerende landsbyer og ægte italiensk mad uden de store turistmasser.',
+    highlights:['Turkise, rene strande','Autentiske landsbyer','Fantastisk italiensk køkken'] },
+
+  { name:'Kenya Kysten', country:'Kenya', emoji:'🦁', url:'https://www.bravotours.dk/rejser/kenya/kenya-kysten/',
+    flightTime:'ca. 10 timer', flightHours:10, priceFrom:'12.999 kr.', priceLevel:4,
+    climate:['tropical','hot'], goals:['adventure','nature','relax'], types:['beach'], activity:2,
+    forms:['safari','solferie'], who:['couple','friends'],
+    tagline:'Safari og palmestrand i ét',
+    description:'Kenya kombinerer det ultimative — safari blandt vilde dyr og bagefter afslapning ved Det Indiske Ocean. En rejse for livet.',
+    highlights:['Safari med de fem store','Palmestrande ved Det Indiske Ocean','En helt unik oplevelse'] },
+];
+
+function recommendTrips(answers) {
+  const sel = id => answers[id] || [];
+  const goalMap = { 'Afslapning og ro':'relax', 'Kultur og seværdigheder':'culture', 'Eventyr og aktiviteter':'adventure', 'Fest og natteliv':'party', 'Natur og stilhed':'nature' };
+  const typeMap = { 'Strand og hav':'beach', 'Storby og byliv':'city', 'Bjerge og natur':'mountain', 'Hyggelige landsbyer':'village' };
+  const climMap = { 'Meget varmt 30°C+':'hot', 'Mildt og solrigt 22–28°C':'mild', 'Tropisk og eksotisk':'tropical' };
+  const formMap = { 'Klassisk solferie':'solferie', 'All Inclusive':'all-inclusive', 'Rundrejse':'roundtrip', 'Safari og natur':'safari', 'Aktiv ferie':'active' };
+  const whoMap  = { 'Alene':'alone', 'Som par':'couple', 'Med venner':'friends', 'Med familie':'family' };
+  const actMap  = { 'Mest afslapning':1, 'En blanding':2, 'Meget aktiv':3 };
+  const budgetMap = { 'Under 4.000 kr.':1, '4.000–8.000 kr.':2, '8.000–15.000 kr.':3, 'Ingen grænse':4 };
+
+  const goals   = sel('goal').map(x => goalMap[x]).filter(Boolean);
+  const types   = sel('dest').map(x => typeMap[x]).filter(Boolean);
+  const climAny = sel('climate').includes('Vejret er ligegyldigt');
+  const clims   = sel('climate').map(x => climMap[x]).filter(Boolean);
+  const forms   = sel('type').map(x => formMap[x]).filter(Boolean);
+  const whos    = sel('who').map(x => whoMap[x]).filter(Boolean);
+  const acts    = sel('activity').map(x => actMap[x]).filter(Boolean);
+  const budgetLevels = sel('budget').map(x => budgetMap[x]).filter(Boolean);
+  const flightPrefs = sel('flight'); // labels
+
+  const bucketOf = h => h <= 3.5 ? 'short' : (h <= 6.5 ? 'medium' : 'long');
+
+  const scored = REC.map((d, i) => {
+    let s = 0;
+    // Mål
+    goals.forEach(g => { if (d.goals.includes(g)) s += 3; });
+    // Destinationstype
+    types.forEach(t => { if (d.types.includes(t)) s += 3; });
+    // Klima
+    if (climAny) s += 1;
+    clims.forEach(c => { if (d.climate.includes(c)) s += 3; });
+    // Aktivitetsniveau (tættest match)
+    if (acts.length) {
+      const best = Math.min(...acts.map(a => Math.abs(a - d.activity)));
+      s += (2 - best);
+    }
+    // Rejseform (stærkt signal)
+    forms.forEach(f => { if (d.forms.includes(f)) s += 4; });
+    // Rejser med
+    whos.forEach(w => { if (d.who.includes(w)) s += 1; });
+    // Flyvetid
+    if (flightPrefs.length) {
+      const b = bucketOf(d.flightHours);
+      let best = -99;
+      flightPrefs.forEach(p => {
+        let v = 0;
+        if (p === '0–3 timer')      v = b === 'short' ? 3 : (b === 'medium' ? 0 : -8);
+        else if (p === '3–6 timer') v = b === 'short' ? 2 : (b === 'medium' ? 3 : -6);
+        else if (p === 'Lang distance') v = b === 'long' ? 5 : (b === 'medium' ? -2 : -3);
+        if (v > best) best = v;
+      });
+      s += best;
+    }
+    // Budget
+    if (budgetLevels.length) {
+      const maxB = Math.max(...budgetLevels);
+      if (d.priceLevel <= maxB) s += 2;
+      else s -= 4 * (d.priceLevel - maxB);
+    }
+    return { d, s, i };
+  });
+
+  scored.sort((a, b) => b.s - a.s || a.i - b.i);
+  const top = scored.slice(0, 3).map(x => x.d);
+
+  // Personlig beskrivelse ud fra svarene
+  const whoTxt = { 'Alene':'på din solotur', 'Som par':'til jer to', 'Med venner':'til vennegruppen', 'Med familie':'til hele familien' };
+  const goalTxt = { 'Afslapning og ro':'ro og afslapning', 'Kultur og seværdigheder':'kultur og seværdigheder', 'Eventyr og aktiviteter':'eventyr og oplevelser', 'Fest og natteliv':'fest og godt humør', 'Natur og stilhed':'natur og stilhed' };
+  const who1 = sel('who')[0];
+  const goal1 = sel('goal')[0];
+  const prefix = [];
+  if (who1 && whoTxt[who1]) prefix.push(`Perfekt ${whoTxt[who1]}`);
+  if (goal1 && goalTxt[goal1]) prefix.push(prefix.length ? `med fokus på ${goalTxt[goal1]}` : `Perfekt til ${goalTxt[goal1]}`);
+  const personal = prefix.length ? prefix.join(' ') + '. ' : '';
+
+  return top.map(d => ({
+    name: d.name,
+    country: d.country,
+    emoji: d.emoji,
+    tagline: d.tagline,
+    description: personal + d.description,
+    highlights: d.highlights,
+    travelForm: ({solferie:'Solferie','all-inclusive':'All Inclusive',roundtrip:'Rundrejse',safari:'Safari',active:'Aktiv ferie'})[d.forms[0]] || 'Solferie',
+    flightTime: d.flightTime,
+    priceFrom: d.priceFrom,
+    url: d.url,
+  }));
+}
+
 /* ─── Main App ─── */
 function BravoApp() {
   const STORAGE_KEY = 'bravo_quiz_state';
@@ -814,14 +1098,9 @@ function BravoApp() {
     } else {
       setPhase('loading');
       try {
-        const userMsg = QUESTIONS.map(q => `${q.q}: ${(answers[q.id] || []).join(', ')}`).join('\n');
-        const raw = await window.claude.complete({
-          messages: [{ role: 'user', content: `Brugerens svar:\n${userMsg}\n\nGiv mig 3 personlige rejseforslag som JSON-array.` }],
-          system: SYSTEM_PROMPT,
-        });
-        const match = raw.match(/\[[\s\S]*\]/);
-        if (!match) throw new Error('Ugyldigt svar fra AI');
-        const trips = JSON.parse(match[0]);
+        const trips = recommendTrips(answers);
+        // kort forsinkelse så loading-animationen når at ses
+        await new Promise(r => setTimeout(r, 1400));
         setResults(trips);
         setPhase('results');
       } catch (e) {
