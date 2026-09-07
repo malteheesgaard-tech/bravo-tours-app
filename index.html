@@ -77,7 +77,7 @@ body {
 </head>
 <body>
 <script>
-const HERO_FILE = window.__resources && window.__resources.heroImg ? window.__resources.heroImg : "images/hero-small.jpg";
+const HERO_FILE = window.__resources && window.__resources.heroImg ? window.__resources.heroImg : "hero-small.jpg";
 </script>
 <script type="text/babel">
 
@@ -186,7 +186,7 @@ function destPhoto(name) {
   };
   const localFile = key ? (LOCAL[key] || 'koh_lanta.jpg') : 'koh_lanta.jpg';
   return {
-    url: `images/${localFile}`,
+    url: `${localFile}`,
     gradient: `linear-gradient(135deg, ${d.g[0]} 0%, ${d.g[1]} 100%)`,
   };
 }
