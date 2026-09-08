@@ -21,6 +21,10 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 button { touch-action: manipulation; }
+/* Lille skærm: lys baggrund + ingen gummi-bounce der viser mørk kant */
+@media (max-width: 640px) {
+  html, body { background: #f0f5fb; overscroll-behavior: none; }
+}
 /* Stor skærm: vis den fine browser-ramme centreret */
 @media (min-width: 641px) {
   body {
@@ -1136,12 +1140,10 @@ function BravoApp() {
   };
 
   const innerContent = (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      overflowY: 'auto',
-      background: C.bg,
-    }}>
+    <div style={ isMobile
+      ? { width: '100%', minHeight: '100%', background: C.bg }
+      : { width: '100%', height: '100%', overflowY: 'auto', background: C.bg }
+    }>
       {/* Header — hidden on welcome */}
       {phase !== 'welcome' && <div style={{ background: C.navy, position: 'sticky', top: 0, zIndex: 10 }}>
         <div style={{
@@ -1202,7 +1204,7 @@ function BravoApp() {
   // Mobil: fyld hele skærmen uden browser-ramme
   if (isMobile) {
     return (
-      <div style={{ width: '100%', height: '100dvh', background: C.bg, overflow: 'hidden' }}>
+      <div style={{ width: '100%', minHeight: '100dvh', background: C.bg }}>
         {innerContent}
       </div>
     );
